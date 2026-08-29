@@ -1,0 +1,18 @@
+# 构建上下文排除项，加速构建并避免敏感文件进入镜像
+node_modules
+**/node_modules
+**/dist
+**/release
+apps/extension/*.zip
+data
+.env
+.env.*
+!.env.example
+.git
+.github
+.codegraph
+.omo
+*.db
+*.db-shm
+*.db-wal
+README.md

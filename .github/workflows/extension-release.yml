@@ -1,0 +1,72 @@
+name: Extension Release
+
+# 发布流程：创建 GitHub Release（tag 形如 v1.0.0）后自动触发。
+# 不会自动发布：仅 push 时不做任何发布动作。
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: 构建 zip / 上传 Release / 上传 Chrome Web Store
+    runs-on: ubuntu-latest
+    env:
+      CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 版本一致性检查（tag = package.json = manifest.json）
+        if: github.event_name == 'release'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./apps/extension/package.json').version")
+          MANIFEST=$(node -p "require('./apps/extension/manifest.json').version")
+          if [ "$TAG" != "$PKG" ] || [ "$PKG" != "$MANIFEST" ]; then
+            echo "::error::版本不一致: tag=$TAG package.json=$PKG manifest.json=$MANIFEST"
+            echo "请将 apps/extension/package.json 与 apps/extension/manifest.json 的 version 改为 $TAG 后重新发布。"
+            exit 1
+          fi
+          echo "版本一致性 ✓ $TAG"
+
+      - name: 构建扩展
+        run: pnpm --filter @private-bookmarks/extension build
+
+      - name: 校验 manifest
+        run: node -e "const m=require('./apps/extension/dist/manifest.json'); if(m.manifest_version!==3) throw new Error('manifest_version 必须为 3'); console.log('manifest ✓', m.name, m.version)"
+
+      - name: 打包 zip
+        run: pnpm --filter @private-bookmarks/extension zip
+
+      - name: 上传到 GitHub Release Assets
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$GITHUB_REF_NAME" apps/extension/private-bookmarks-extension-v*.zip --repo "$GITHUB_REPOSITORY" --clobber
+
+      - name: 上传到 Chrome Web Store
+        if: github.event_name == 'release' && env.CHROME_EXTENSION_ID != '' && env.CHROME_CLIENT_ID != '' && env.CHROME_CLIENT_SECRET != '' && env.CHROME_REFRESH_TOKEN != ''
+        run: node scripts/publish-webstore.mjs upload
+
+      - name: 发布到 Chrome Web Store
+        if: github.event_name == 'release' && env.CHROME_EXTENSION_ID != '' && env.CHROME_CLIENT_ID != '' && env.CHROME_CLIENT_SECRET != '' && env.CHROME_REFRESH_TOKEN != ''
+        run: node scripts/publish-webstore.mjs publish

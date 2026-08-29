@@ -1,0 +1,22 @@
+{
+  "name": "@private-bookmarks/extension",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "zip": "node scripts/zip.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@private-bookmarks/shared": "workspace:*",
+    "@private-bookmarks/sync-protocol": "workspace:*",
+    "@types/chrome": "^0.0.326",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

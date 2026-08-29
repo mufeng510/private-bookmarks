@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Private Bookmarks</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="popup">
+      <div class="popup-header">
+        <span class="popup-title">🔖 Private Bookmarks</span>
+      </div>
+
+      <div class="popup-status">
+        <span id="status-dot" class="dot"></span>
+        <span id="status-text">读取中…</span>
+      </div>
+
+      <div class="popup-kv">
+        <span>书签数量</span>
+        <strong id="bookmark-count">–</strong>
+      </div>
+      <div class="popup-kv">
+        <span>上次同步</span>
+        <strong id="last-sync">从未</strong>
+      </div>
+      <div id="last-stats" class="popup-stats hidden"></div>
+      <div id="last-error" class="popup-error hidden"></div>
+
+      <button id="sync-now" class="btn btn-primary">立即同步</button>
+
+      <label class="toggle-row">
+        <span>自动同步（事件 + 定时全量）</span>
+        <input type="checkbox" id="auto-sync" checked />
+      </label>
+
+      <div class="popup-links">
+        <button id="open-web" class="btn">打开私人书签</button>
+        <button id="open-options" class="btn">设置</button>
+      </div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

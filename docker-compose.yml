@@ -1,0 +1,19 @@
+services:
+  bookmark:
+    # 默认使用 Docker Hub 官方镜像，见 .github/workflows/docker.yml
+    # 也可自行构建：docker build -t private-bookmarks . 并把 IMAGE 改为本地镜像名
+    image: ${IMAGE:-jerry0510/private-bookmarks:latest}
+    container_name: private-bookmarks
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      # 容器内固定监听 8080；宿主机端口由上方 ports 的 ${PORT} 控制
+      PORT: 8080
+      DATABASE_URL: /app/data/bookmarks.db
+    # 镜像自带 HEALTHCHECK（/api/health），无需重复配置

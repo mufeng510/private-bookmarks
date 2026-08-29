@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Private Bookmarks Sync",
+  "description": "将浏览器书签单向同步到你的私有书签服务器（NAS 自托管）。服务器绝不反向修改浏览器书签。",
+  "version": "1.0.0",
+  "minimum_chrome_version": "110",
+  "permissions": ["bookmarks", "storage", "alarms"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Private Bookmarks"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
