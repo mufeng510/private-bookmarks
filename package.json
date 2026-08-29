@@ -15,7 +15,8 @@
     "typecheck": "pnpm build && pnpm -r typecheck",
     "dev:server": "pnpm --filter @private-bookmarks/server dev",
     "dev:web": "pnpm --filter @private-bookmarks/web dev",
-    "build:extension": "pnpm --filter @private-bookmarks/extension build"
+    "build:extension": "pnpm --filter @private-bookmarks/extension build",
+    "release": "node scripts/release.mjs"
   },
   "devDependencies": {
     "eslint": "^9.30.0",

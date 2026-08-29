@@ -39,10 +39,10 @@ private-bookmarks/
 ├── packages/
 │   ├── shared/        # 共享类型与常量（URL 白名单校验、错误码等）
 │   └── sync-protocol/ # 扩展 ↔ 服务器同步协议类型
-├── scripts/           # Chrome Web Store 发布脚本
+├── scripts/           # 发布脚本（一键发版 + Chrome Web Store 上传）
 ├── docker-compose.yml
 ├── Dockerfile         # multi-stage，非 root 运行，内置 healthcheck
-└── .github/workflows/ # test / docker / extension-release
+└── .github/workflows/ # test / docker / release
 ```
 
 ## 技术栈
@@ -192,7 +192,7 @@ docker compose down && rm -rf data .env
 | `CHROME_CLIENT_SECRET` | OAuth Client Secret |
 | `CHROME_REFRESH_TOKEN` | OAuth Refresh Token |
 
-4. 发布：把版本号改到 `apps/extension/package.json` 与 `apps/extension/manifest.json`（CI 校验一致性），创建 GitHub Release（tag 如 `v1.2.0`），Actions 会自动：构建 → 校验 manifest → 打 zip → 上传 Release Assets → 上传 Chrome Web Store → 提交审核发布
+4. 发布：直接 `pnpm release 1.2.0`（见下方「版本发布」）。CI 自动：构建 → 校验 manifest → 打 zip → 创建 GitHub Release 并上传 → 上传 Chrome Web Store → 提交审核发布
 
 > Chrome Web Store 审核由 Google 控制，提交后不会立即公开。
 
@@ -202,7 +202,32 @@ docker compose down && rm -rf data .env
 |---|---|---|
 | `test.yml` | push / PR | lint → typecheck → test → build → 版本一致性检查 |
 | `docker.yml` | push main / tag v* / PR / 手动 | Buildx 多架构构建（amd64 + arm64）并推送 Docker Hub `jerry0510/private-bookmarks`；main 推送 `latest` + `sha-` 标签，`v*` 标签额外推送 `1.0.0`、`1.0` 版本标签；PR 仅构建验证不推送 |
-| `extension-release.yml` | GitHub Release / 手动 | 扩展版本校验 → 构建 → zip → Release Assets → Chrome Web Store |
+| `release.yml` | push tag v* | 版本一致性校验（tag = package.json = manifest.json）→ 全量构建 → 打包扩展 zip → 创建 GitHub Release 并上传 → Chrome Web Store 上传与提交发布（需配置 Secrets） |
+
+## 版本发布（自动打 tag）
+
+日常开发直接 push 到 main：CI 自动跑测试并发布 `latest` Docker 镜像，**不会**产生正式版本。
+
+需要发布正式版本时，一条命令：
+
+```bash
+pnpm release 1.1.0     # 或 pnpm release --patch / --minor / --major
+```
+
+脚本会自动完成：更新所有 `package.json` 与扩展 `manifest.json` 的版本号 → 提交 `chore(release): v1.1.0` → 打标签 `v1.1.0` → 推送 GitHub。
+
+之后的发布全部自动：
+
+```text
+tag v1.1.0 推送
+  ├─ docker.yml  → Docker Hub 镜像 1.1.0 / 1.1 / latest
+  └─ release.yml → GitHub Release v1.1.0（自动生成变更说明 + 扩展 zip）
+                → Chrome Web Store 上传并提交审核（需已配置 CHROME_* Secrets）
+```
+
+> 说明：tag 必须由本地真实推送触发（`pnpm release` 用你的 git 凭证推送）。若由 CI 用内置
+> GITHUB_TOKEN 创建 tag/Release，GitHub 不会触发其他 workflow（防递归），所以发布入口放在本地脚本。
+
 
 ## API 一览
 
