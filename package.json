@@ -10,9 +10,9 @@
   },
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm build && pnpm -r test",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm build && pnpm -r typecheck",
     "dev:server": "pnpm --filter @private-bookmarks/server dev",
     "dev:web": "pnpm --filter @private-bookmarks/web dev",
     "build:extension": "pnpm --filter @private-bookmarks/extension build"

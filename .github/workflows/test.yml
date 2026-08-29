@@ -27,14 +27,15 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # 先构建 workspace 包（shared/sync-protocol 的 dist 是后续 typecheck/test 的依赖）
+      - name: 构建
+        run: pnpm build
+
       - name: Typecheck
         run: pnpm typecheck
 
       - name: 单元测试
         run: pnpm test
-
-      - name: 构建
-        run: pnpm build
 
       - name: 版本一致性检查（extension package.json ↔ manifest.json）
         run: |

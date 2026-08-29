@@ -35,6 +35,10 @@ jobs:
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
 
+      # 扩展打包依赖 shared/sync-protocol 的构建产物，先全量构建
+      - name: 全量构建
+        run: pnpm build
+
       - name: 版本一致性检查（tag = package.json = manifest.json）
         if: github.event_name == 'release'
         run: |
