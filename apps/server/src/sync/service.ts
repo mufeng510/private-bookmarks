@@ -11,6 +11,11 @@ const MAX_URL_LENGTH = 4096;
 const MAX_REMOTE_ID_LENGTH = 128;
 const MAX_CLIENT_ID_LENGTH = 128;
 
+/** 扩展/导入命名空间的保留 clientId，扩展同步不允许使用 */
+export const RESERVED_CLIENT_ID = 'import';
+/** 自定义 Client ID 的合法格式 */
+export const CLIENT_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$/;
+
 interface BookmarkRow {
   id: number;
   clientId: string;
@@ -242,5 +247,17 @@ export function countDeleted(db: Db): number {
     .where(isNotNull(bookmarks.deletedAt))
     .all()
     .length;
+}
+
+/**
+ * 彻底删除某台设备的全部同步数据（书签 + 同步状态，物理删除）。
+ * 场景：重装系统/重装扩展后 Client ID 变化，清理旧设备残留；
+ * 或改用自定义 Client ID 后移除旧标识数据。
+ * 注意：若该设备上的扩展仍在运行，下次同步会重新上传，属预期行为。
+ */
+export function deleteClientData(db: Db, clientId: string): { bookmarks: number } {
+  const result = db.delete(bookmarks).where(eq(bookmarks.clientId, clientId)).run();
+  db.delete(syncState).where(eq(syncState.clientId, clientId)).run();
+  return { bookmarks: result.changes };
 }
 

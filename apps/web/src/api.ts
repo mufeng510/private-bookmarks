@@ -71,6 +71,8 @@ export const api = {
   purgeDeleted: () => request<{ purged: number }>('/api/bookmarks/purge-deleted', { method: 'POST' }),
 
   syncStatus: () => request<SyncStatus>('/api/sync/status'),
+  deleteClient: (clientId: string) =>
+    request<{ ok: boolean; bookmarks: number }>(`/api/clients/${encodeURIComponent(clientId)}`, { method: 'DELETE' }),
   createToken: (name: string) =>
     request<TokenCreated>('/api/sync-tokens', { method: 'POST', body: JSON.stringify({ name }) }),
   listTokens: () => request<{ tokens: TokenInfo[] }>('/api/sync-tokens'),

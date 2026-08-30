@@ -147,6 +147,7 @@ function SyncSection() {
   const [created, setCreated] = React.useState<TokenCreated | null>(null);
   const [copied, setCopied] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [msg, setMsg] = React.useState<{ ok: boolean; text: string } | null>(null);
 
   const reload = React.useCallback(async () => {
     try {
@@ -180,6 +181,22 @@ function SyncSection() {
     await reload();
   }
 
+  async function deleteClientData(clientId: string, count: number) {
+    const ok = window.confirm(
+      `确定删除设备「${clientLabel(clientId)}」的全部 ${count} 条书签数据吗？\n\n` +
+        '此操作不可恢复。若该设备上的扩展仍在使用旧标识，下次同步会重新上传。\n' +
+        '重装系统/更换设备标识后，可用它清理旧设备残留。',
+    );
+    if (!ok) return;
+    try {
+      const r = await api.deleteClient(clientId);
+      setMsg({ ok: true, text: `已删除设备「${clientLabel(clientId)}」的数据 ${r.bookmarks} 条` });
+      await reload();
+    } catch {
+      setMsg({ ok: false, text: '删除设备数据失败' });
+    }
+  }
+
   async function copyToken() {
     if (!created) return;
     try {
@@ -195,7 +212,9 @@ function SyncSection() {
     <section className="card">
       <h2 className="card-title">🔄 同步</h2>
 
-      <div className="card-subtitle">设备与最后同步时间</div>
+      <div className="card-subtitle">设备与最后同步时间（重装系统后在扩展里填回同一 Client ID 即可延续数据）</div>
+      {error && <div className="error-hint">⚠️ {error}</div>}
+      {msg && <div className={msg.ok ? 'ok-hint' : 'error-hint'}>{msg.ok ? '✅' : '⚠️'} {msg.text}</div>}
       {status && status.clients.length === 0 && <div className="empty-hint">还没有设备同步过，安装浏览器扩展后开始。</div>}
       {status?.clients.map((c) => (
         <div key={c.clientId} className="kv-row">
@@ -203,6 +222,13 @@ function SyncSection() {
           <span className="kv-value">
             {c.bookmarkCount} 个书签 · 最后同步 {formatTime(c.lastSyncAt)}
             {c.lastFullSyncAt ? ` · 全量校验 ${formatTime(c.lastFullSyncAt)}` : ''}
+            <button
+              className="btn btn-small btn-danger"
+              title="删除该设备的全部同步数据（不可恢复）"
+              onClick={() => void deleteClientData(c.clientId, c.bookmarkCount)}
+            >
+              删除数据
+            </button>
           </span>
         </div>
       ))}

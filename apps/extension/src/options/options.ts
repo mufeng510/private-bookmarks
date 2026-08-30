@@ -1,4 +1,4 @@
-import { ensureClientId, getSettings, normalizeServerUrl, saveSettings } from '../shared/storage.js';
+import { ensureClientId, getSettings, normalizeServerUrl, saveSettings, saveSnapshot } from '../shared/storage.js';
 import { testConnection } from '../shared/sync-client.js';
 
 const serverUrlInput = document.getElementById('server-url') as HTMLInputElement;
@@ -37,6 +37,8 @@ async function requestHostPermission(serverUrl: string): Promise<boolean> {
   }
 }
 
+const CLIENT_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$/;
+
 saveBtn.addEventListener('click', () => {
   void (async () => {
     const serverUrl = normalizeServerUrl(serverUrlInput.value);
@@ -50,16 +52,44 @@ saveBtn.addEventListener('click', () => {
       return;
     }
 
+    // Client ID：可自定义；留空沿用现有值
+    const settingsBefore = await getSettings();
+    const desiredId = clientIdInput.value.trim();
+    let clientId = settingsBefore.clientId;
+    let clientIdChanged = false;
+    if (desiredId && desiredId !== settingsBefore.clientId) {
+      if (!CLIENT_ID_RE.test(desiredId)) {
+        showMessage('err', '❌ Client ID 需 3-64 位，字母数字开头，仅可用 . _ -');
+        return;
+      }
+      if (desiredId === 'import') {
+        showMessage('err', '❌ "import" 是导入数据的保留标识，不能使用');
+        return;
+      }
+      clientId = desiredId;
+      clientIdChanged = true;
+    }
+
     const granted = await requestHostPermission(serverUrl);
     await saveSettings({
       serverUrl,
       syncToken,
+      clientId,
       autoSyncPeriodMinutes: Number(periodSelect.value),
       eventSyncEnabled: eventSyncInput.checked,
     });
     await ensureClientId();
 
-    if (granted) {
+    if (clientIdChanged) {
+      // 标识变了：本地快照属于旧标识，必须清空，让下一次全量同步在新标识下重建
+      await saveSnapshot({});
+      showMessage(
+        'ok',
+        granted
+          ? `✅ 已保存，设备标识已切换为 "${clientId}"。请点击"立即全量同步"上传本书签到新标识；旧标识的数据可在网站设置页删除。`
+          : `⚠️ 已保存，但未授予服务器访问权限。设备标识已切换为 "${clientId}"。`,
+      );
+    } else if (granted) {
       showMessage('ok', '✅ 已保存。书签变更将自动同步（首次请在 popup 中点击"立即同步"或等待定时全量）。');
     } else {
       showMessage('err', '⚠️ 已保存，但未授予访问服务器地址的权限，同步可能无法进行。');

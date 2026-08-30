@@ -135,9 +135,12 @@
       <input type="password" id="sync-token" placeholder="BM_xxxxxxxx" autocomplete="off" />
       <p class="hint">在网站「设置 → 同步」中创建，只在创建时完整显示一次。</p>
 
-      <label for="client-id">Client ID（本机标识，只读）</label>
-      <input type="text" id="client-id" class="readonly" readonly />
-      <p class="hint">首次安装自动生成，用于在网站上区分不同设备。</p>
+      <label for="client-id">Client ID（设备标识）</label>
+      <input type="text" id="client-id" placeholder="如 chrome-desktop、edge-laptop" autocomplete="off" maxlength="64" />
+      <p class="hint">
+        首次安装自动生成随机 ID，可自定义（3-64 位，字母数字开头，可用 . _ -）。重装系统/重装扩展后填同一个
+        ID，同步数据就会延续到同一台"设备"；换新 ID 则视为新设备（旧数据可在网站设置页删除）。
+      </p>
 
       <label for="sync-period">定时全量校验周期</label>
       <select id="sync-period">
