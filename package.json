@@ -1,6 +1,6 @@
 {
   "name": "private-bookmarks",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "一个运行在个人 NAS 上的私有跨浏览器书签同步系统",
   "type": "module",
