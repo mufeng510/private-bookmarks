@@ -1,5 +1,5 @@
 import type { SyncChange } from '@private-bookmarks/sync-protocol';
-import { ensureClientId, getSettings, isConfigured, loadSnapshot, saveSnapshot } from '../shared/storage.js';
+import { DEVICE_SETTINGS_KEY, ensureClientId, getSettings, isConfigured, loadSnapshot, saveSnapshot, SYNC_SETTINGS_KEY } from '../shared/storage.js';
 import { collectDateAdded, diffSnapshot, flattenTree, fullSyncChanges, type BrowserBookmarkNode } from '../shared/tree.js';
 import { performSync, type SyncRunResult } from '../shared/sync-client.js';
 
@@ -110,8 +110,11 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes['settings']) {
-    // 设置变化（如自动同步周期）后重新调度
+  // 设置变化（本机修改，或浏览器账号从其他设备同步下来）后重新调度定时全量同步
+  const syncSettingsChanged = area === 'sync' && Boolean(changes[SYNC_SETTINGS_KEY]);
+  const deviceChanged = area === 'local' && Boolean(changes[DEVICE_SETTINGS_KEY]);
+  const legacyChanged = area === 'local' && Boolean(changes['settings']);
+  if (syncSettingsChanged || deviceChanged || legacyChanged) {
     void scheduleAlarm();
   }
 });

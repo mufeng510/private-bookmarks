@@ -124,7 +124,10 @@
   <body>
     <div class="card">
       <h1>🔖 Private Bookmarks Sync</h1>
-      <p class="subtitle">浏览器书签单向同步到你的私有服务器（浏览器 → 服务器，服务器绝不修改浏览器书签）</p>
+      <p class="subtitle">
+        浏览器书签单向同步到你的私有服务器（浏览器 → 服务器，服务器绝不修改浏览器书签）。
+        服务器地址、Token 等设置保存在浏览器账号中自动同步（Chrome 走 Google 账号 / Edge 走 Microsoft 账号）。
+      </p>
 
       <label for="server-url">服务器地址</label>
       <input type="text" id="server-url" placeholder="https://bookmark.example.com" />
@@ -135,11 +138,11 @@
       <input type="password" id="sync-token" placeholder="BM_xxxxxxxx" autocomplete="off" />
       <p class="hint">在网站「设置 → 同步」中创建，只在创建时完整显示一次。</p>
 
-      <label for="client-id">Client ID（设备标识）</label>
+      <label for="client-id">Client ID（设备标识，仅保存在本机）</label>
       <input type="text" id="client-id" placeholder="如 chrome-desktop、edge-laptop" autocomplete="off" maxlength="64" />
       <p class="hint">
-        首次安装自动生成随机 ID，可自定义（3-64 位，字母数字开头，可用 . _ -）。重装系统/重装扩展后填同一个
-        ID，同步数据就会延续到同一台"设备"；换新 ID 则视为新设备（旧数据可在网站设置页删除）。
+        首次安装自动生成随机 ID，可自定义（3-64 位，字母数字开头，可用 . _ -）。本机标识不跟随浏览器账号同步——
+        每台设备保留独立数据源，多台设备登录同一账号也不会互相覆盖。重装系统后填回同一个 ID 即可延续数据。
       </p>
 
       <label for="sync-period">定时全量校验周期</label>
@@ -167,7 +170,9 @@
       <div class="section">
         <p class="hint" style="font-weight: 600">安全说明</p>
         <ul>
-          <li>Sync Token 只保存在本浏览器的 chrome.storage.local，不会发送给任何第三方。</li>
+          <li>服务器地址、Sync Token 等设置保存在浏览器账号的同步存储中（chrome.storage.sync），跟随账号在登录同一账号的浏览器间自动同步。</li>
+          <li>Sync Token 仅发送到你配置的服务器，不会发送给任何第三方。</li>
+          <li>Client ID 与书签快照仅保存在本机（chrome.storage.local），不随账号同步。</li>
           <li>扩展只读取书签并上传，绝不会创建、修改、移动或删除浏览器书签。</li>
           <li>公网部署务必使用 HTTPS。</li>
         </ul>
