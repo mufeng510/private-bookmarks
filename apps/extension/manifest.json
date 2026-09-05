@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Private Bookmarks Sync",
   "description": "将浏览器书签单向同步到你的私有书签服务器（NAS 自托管）。服务器绝不反向修改浏览器书签。",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "minimum_chrome_version": "110",
   "permissions": [
     "bookmarks",
