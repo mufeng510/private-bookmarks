@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "rootDirectory": ".",
   "buildCommand": "pnpm --filter @private-bookmarks/website build",
   "devCommand": "pnpm --filter @private-bookmarks/website dev",
   "installCommand": "pnpm install",
