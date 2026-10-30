@@ -13,3 +13,5 @@ apps/extension/release/
 apps/extension/*.zip
 .codegraph/
 .omo/
+.vercel
+.env*
