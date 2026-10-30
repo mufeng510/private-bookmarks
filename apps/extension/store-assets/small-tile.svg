@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="280">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f6f7f9"/>
+    </linearGradient>
+  </defs>
+  <rect width="440" height="280" fill="url(#bg)"/>
+  <circle cx="380" cy="60" r="40" fill="#e3e6ea" opacity="0.6"/>
+  <circle cx="60" cy="220" r="50" fill="#e3e6ea" opacity="0.4"/>
+  <g transform="translate(156,36)">
+  <rect x="16" y="16" width="96" height="96" rx="20" fill="#3b82f6"/>
+  <path d="M 44 32 L 84 32 L 84 96 L 64 76 L 44 96 Z" fill="#ffffff"/>
+  <circle cx="64" cy="44" r="6" fill="#ffffff" opacity="0.9"/>
+</g>
+  <text x="220" y="204" text-anchor="middle" font-family="'DejaVu Sans', sans-serif" font-size="20" font-weight="bold" fill="#1c1e21">Private Bookmarks Sync</text>
+  <text x="220" y="230" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="14" fill="#666666">私有书签同步扩展 · 单向同步到你的私有书签服务器</text>
+</svg>

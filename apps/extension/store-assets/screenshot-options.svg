@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f6f7f9"/>
+      <stop offset="100%" stop-color="#eef0f3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="800" fill="url(#bg)"/>
+  <rect x="340" y="120" width="600" height="560" rx="16" fill="#ffffff" stroke="#e3e6ea" stroke-width="1"/>
+  <rect x="340" y="120" width="600" height="64" rx="16" fill="#ffffff"/>
+  <text x="640" y="162" text-anchor="middle" font-family="'DejaVu Sans', sans-serif" font-size="24" font-weight="bold" fill="#1c1e21">Private Bookmarks 设置</text>
+  <text x="640" y="188" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="14" fill="#666666">将浏览器书签单向同步到你的私有书签服务器</text>
+  <text x="380" y="248" font-family="'Noto Sans CJK SC', sans-serif" font-size="16" font-weight="bold" fill="#1c1e21">同步服务器地址</text>
+  <rect x="380" y="264" width="520" height="44" rx="8" fill="#f6f7f9" stroke="#d0d5dd" stroke-width="1"/>
+  <text x="400" y="294" font-family="'DejaVu Sans', sans-serif" font-size="14" fill="#9ca3af">https://bookmarks.example.com</text>
+  <text x="380" y="338" font-family="'Noto Sans CJK SC', sans-serif" font-size="16" font-weight="bold" fill="#1c1e21">Sync Token</text>
+  <rect x="380" y="354" width="520" height="44" rx="8" fill="#f6f7f9" stroke="#d0d5dd" stroke-width="1"/>
+  <text x="400" y="384" font-family="'DejaVu Sans', sans-serif" font-size="14" fill="#9ca3af">sk_live_·······（创建时一次性展示）</text>
+  <text x="380" y="428" font-family="'Noto Sans CJK SC', sans-serif" font-size="16" font-weight="bold" fill="#1c1e21">客户端 ID</text>
+  <rect x="380" y="444" width="520" height="44" rx="8" fill="#f6f7f9" stroke="#d0d5dd" stroke-width="1"/>
+  <text x="400" y="474" font-family="'DejaVu Sans', sans-serif" font-size="14" fill="#9ca3af">chrome-desktop</text>
+  <rect x="380" y="500" width="200" height="44" rx="8" fill="#2563eb"/>
+  <text x="480" y="530" text-anchor="middle" font-family="'DejaVu Sans', sans-serif" font-size="16" font-weight="bold" fill="#ffffff">保存设置</text>
+  <rect x="600" y="500" width="300" height="44" rx="8" fill="#f6f7f9" stroke="#d0d5dd" stroke-width="1"/>
+  <text x="750" y="530" text-anchor="middle" font-family="'DejaVu Sans', sans-serif" font-size="14" fill="#6b7280">立即同步书签</text>
+  <text x="640" y="650" text-anchor="middle" font-family="'Noto Sans CJK SC', sans-serif" font-size="13" fill="#6b7280">服务器绝不反向修改浏览器书签 · Manifest V3 · 单向同步</text>
+</svg>

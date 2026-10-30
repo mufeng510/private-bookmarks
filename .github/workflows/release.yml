@@ -1,7 +1,7 @@
 name: Release
 
 # 推送 v* 标签（本地 pnpm release 命令或手动打标签）时触发：
-# 校验版本一致性 → 构建扩展 → 创建 GitHub Release 并上传扩展 zip → Chrome Web Store（如已配置 Secrets）
+# 校验版本一致性 → 构建扩展 → 创建 GitHub Release 并上传扩展 zip → Chrome Web Store / Edge 扩展商店（如已配置 Secrets）
 # Docker 版本镜像由 docker.yml 同一标签推送触发，见 .github/workflows/docker.yml
 on:
   push:
@@ -19,6 +19,9 @@ jobs:
       CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
       CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
       CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+      EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+      EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+      EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
 
     steps:
       - uses: actions/checkout@v4
@@ -72,3 +75,11 @@ jobs:
       - name: 发布到 Chrome Web Store
         if: env.CHROME_EXTENSION_ID != '' && env.CHROME_CLIENT_ID != '' && env.CHROME_CLIENT_SECRET != '' && env.CHROME_REFRESH_TOKEN != ''
         run: node scripts/publish-webstore.mjs publish
+
+      - name: 上传到 Edge 扩展商店
+        if: env.EDGE_API_KEY != '' && env.EDGE_CLIENT_ID != '' && env.EDGE_PRODUCT_ID != ''
+        run: node scripts/publish-edge.mjs upload
+
+      - name: 发布到 Edge 扩展商店
+        if: env.EDGE_API_KEY != '' && env.EDGE_CLIENT_ID != '' && env.EDGE_PRODUCT_ID != ''
+        run: node scripts/publish-edge.mjs publish

@@ -205,13 +205,33 @@ docker compose down && rm -rf data .env
 
 > Chrome Web Store 审核由 Google 控制，提交后不会立即公开。
 
+## Edge 扩展商店发布（维护者）
+
+Edge 扩展商店使用 Microsoft Partner Center 的 **Update REST API v1.1**，仅支持更新已存在的扩展，**不能**新建产品。新扩展必须先在 Partner Center 手动上架一次，拿到产品 ID（GUID）后，CI 才能自动上传并发布后续版本。
+
+前提：该扩展已在 Partner Center 创建过，且已在 Publish API 页面生成 API 凭证。
+
+1. 在 [Microsoft Partner Center](https://partner.microsoft.com/dashboard/microsoftedge/public/login?ref=dd) 登录，进入 **Microsoft Edge** > **Publish API**，点击 **Create API credentials**，生成 **Client ID** 与 **API Key**。
+2. 在 Partner Center **Extension overview** 页复制 **Product ID**（GUID，URL 中 `microsoftedge/` 与 `/packages` 之间）。
+3. 在仓库 Settings → Secrets 配置：
+
+| Secret | 说明 |
+|---|---|
+| `EDGE_API_KEY` | Partner Center Publish API 生成的 API Key |
+| `EDGE_CLIENT_ID` | Partner Center Publish API 生成的 Client ID |
+| `EDGE_PRODUCT_ID` | 扩展在 Partner Center 中的产品 ID（GUID） |
+
+4. 发布：直接 `pnpm release 1.2.0`（见下方「版本发布」）。CI 自动：构建 → 校验 manifest → 打 zip → 创建 GitHub Release 并上传 → 上传 Edge 扩展商店 → 提交审核发布（需已配置上述 Secrets）。
+
+> Edge 扩展商店审核由 Microsoft 控制，提交后不会立即公开。审核可能需数个工作日。
+
 ## GitHub Actions
 
 | Workflow | 触发 | 作用 |
 |---|---|---|
 | `test.yml` | push / PR | lint → typecheck → test → build → 版本一致性检查 |
 | `docker.yml` | push main / tag v* / PR / 手动 | Buildx 多架构构建（amd64 + arm64）并推送 Docker Hub `jerry0510/private-bookmarks`；main 推送 `latest` + `sha-` 标签，`v*` 标签额外推送 `1.0.0`、`1.0` 版本标签；PR 仅构建验证不推送 |
-| `release.yml` | push tag v* | 版本一致性校验（tag = package.json = manifest.json）→ 全量构建 → 打包扩展 zip → 创建 GitHub Release 并上传 → Chrome Web Store 上传与提交发布（需配置 Secrets） |
+| `release.yml` | push tag v* | 版本一致性校验（tag = package.json = manifest.json）→ 全量构建 → 打包扩展 zip → 创建 GitHub Release 并上传 → Chrome Web Store 与 Edge 扩展商店 上传并提交发布（需配置 Secrets） |
 
 ## 版本发布（自动打 tag）
 
@@ -232,6 +252,7 @@ tag v1.1.0 推送
   ├─ docker.yml  → Docker Hub 镜像 1.1.0 / 1.1 / latest
   └─ release.yml → GitHub Release v1.1.0（自动生成变更说明 + 扩展 zip）
                 → Chrome Web Store 上传并提交审核（需已配置 CHROME_* Secrets）
+                → Edge 扩展商店 上传并提交审核（需已配置 EDGE_* Secrets）
 ```
 
 > 说明：tag 必须由本地真实推送触发（`pnpm release` 用你的 git 凭证推送）。若由 CI 用内置

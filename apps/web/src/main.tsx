@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import LoginPage from './pages/LoginPage.js';
 import BookmarksPage from './pages/BookmarksPage.js';
 import SettingsPage from './pages/SettingsPage.js';
+import PrivacyPage from './pages/PrivacyPage.js';
 import { AuthProvider, useAuth } from './auth';
 import './styles.css';
 
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
         <LoginPage />
       </PublicOnly>
     ),
+  },
+  {
+    path: '/privacy',
+    element: <PrivacyPage />,
   },
   {
     path: '/bookmarks',
