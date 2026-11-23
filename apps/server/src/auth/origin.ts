@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Config } from '../config.js';
 import { AppError } from '../lib/errors.js';
+import { effectiveScheme } from '../lib/request-scheme.js';
 
 /**
  * CSRF 防护：对使用 Cookie 认证的状态修改请求做 Origin/Referer 校验。
@@ -20,8 +21,9 @@ export function assertSameOrigin(origin: string | undefined, config: Config, req
   }
   const host = request.headers.host;
   if (host) {
-    const proto = (request.headers['x-forwarded-proto'] as string | undefined) ?? 'http';
-    allowed.add(`${proto}://${host}`);
+    // 与 Cookie Secure 使用同一套协议判定，确保 https 域名 / http 局域网 IP 混合部署时
+    // 同源校验与浏览器实际看到的协议一致。
+    allowed.add(`${effectiveScheme(request, config)}://${host}`);
   }
 
   if (allowed.has(origin)) return;

@@ -3,6 +3,7 @@ import { SESSION_COOKIE_NAME } from '@private-bookmarks/shared';
 import type { Config } from '../config.js';
 import type { Db } from '../db/client.js';
 import { AppError } from '../lib/errors.js';
+import { isSecureRequest } from '../lib/request-scheme.js';
 import { assertSameOrigin } from './origin.js';
 import { findSessionUser, type SessionUser } from './sessions.js';
 import { verifySyncToken, type SyncTokenRow } from '../sync/tokens.js';
@@ -53,11 +54,17 @@ export function requireSyncToken(db: Db) {
   };
 }
 
-export function setSessionCookie(reply: FastifyReply, config: Config, token: string, expiresAt: Date): void {
+export function setSessionCookie(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  config: Config,
+  token: string,
+  expiresAt: Date,
+): void {
   reply.setCookie(SESSION_COOKIE_NAME, token, {
     path: '/',
     httpOnly: true,
-    secure: config.baseUrl.startsWith('https://'),
+    secure: isSecureRequest(request, config),
     sameSite: 'lax',
     expires: expiresAt,
     signed: true,
@@ -65,11 +72,11 @@ export function setSessionCookie(reply: FastifyReply, config: Config, token: str
   reply.header('Cache-Control', 'no-store');
 }
 
-export function clearSessionCookie(reply: FastifyReply, config: Config): void {
+export function clearSessionCookie(request: FastifyRequest, reply: FastifyReply, config: Config): void {
   reply.clearCookie(SESSION_COOKIE_NAME, {
     path: '/',
     httpOnly: true,
-    secure: config.baseUrl.startsWith('https://'),
+    secure: isSecureRequest(request, config),
     sameSite: 'lax',
     signed: true,
   });

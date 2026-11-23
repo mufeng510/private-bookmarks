@@ -54,7 +54,7 @@ export function registerAuthRoutes(app: FastifyInstance, db: Db, config: Config)
 
       pruneExpiredSessions(db);
       const session = createSession(db, config, user.id);
-      setSessionCookie(reply, config, session.token, session.expiresAt);
+      setSessionCookie(request, reply, config, session.token, session.expiresAt);
       request.log.info({ outcome: 'success' }, 'login success');
       return { username: user.username, version: APP_VERSION };
     },
@@ -63,7 +63,7 @@ export function registerAuthRoutes(app: FastifyInstance, db: Db, config: Config)
   app.post('/api/auth/logout', {
     async handler(request, reply) {
       destroySession(db, getSessionToken(request));
-      clearSessionCookie(reply, config);
+      clearSessionCookie(request, reply, config);
       return { ok: true };
     },
   });
@@ -105,7 +105,7 @@ export function registerAuthRoutes(app: FastifyInstance, db: Db, config: Config)
     async handler(request, reply) {
       const user = request.sessionUser!;
       const destroyed = destroyAllSessions(db, user.id);
-      clearSessionCookie(reply, config);
+      clearSessionCookie(request, reply, config);
       request.log.info({ destroyed }, 'logged out all devices');
       return { ok: true, destroyed };
     },

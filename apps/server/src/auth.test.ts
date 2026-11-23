@@ -159,3 +159,137 @@ describe('登录限流', () => {
     }
   });
 });
+
+describe('Cookie Secure 随访问协议自动判定', () => {
+  const credentials = { username: TEST_USERNAME, password: TEST_PASSWORD };
+
+  function rawCookie(res: { headers: Record<string, unknown> }): string {
+    const header = res.headers['set-cookie'];
+    return Array.isArray(header) ? header.join('') : String(header ?? '');
+  }
+
+  it('http 局域网 IP 直连：即使 BASE_URL 是 https，也不下发 Secure', async () => {
+    const app = await buildTestApp({ baseUrl: 'https://bookmark.example.com' });
+    try {
+      const res = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: { host: '192.168.31.13:31007' },
+        payload: credentials,
+      });
+      expect(res.statusCode).toBe(200);
+      const raw = rawCookie(res);
+      expect(raw).toContain('HttpOnly');
+      expect(raw).not.toContain('Secure');
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('反向代理转发 X-Forwarded-Proto: https：下发 Secure', async () => {
+    const app = await buildTestApp();
+    try {
+      const res = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: { 'x-forwarded-proto': 'https' },
+        payload: credentials,
+      });
+      expect(res.statusCode).toBe(200);
+      expect(rawCookie(res)).toContain('Secure');
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('BASE_URL 为 https 且 Host 匹配：兼容未转发协议头的代理，仍下发 Secure', async () => {
+    const app = await buildTestApp({ baseUrl: 'https://bookmark.example.com' });
+    try {
+      const res = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: { host: 'bookmark.example.com', origin: 'https://bookmark.example.com' },
+        payload: credentials,
+      });
+      expect(res.statusCode).toBe(200);
+      expect(rawCookie(res)).toContain('Secure');
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('显式 X-Forwarded-Proto: http 优先于 BASE_URL，避免 http 下 Cookie 被标成 Secure', async () => {
+    const app = await buildTestApp({ baseUrl: 'https://bookmark.example.com' });
+    try {
+      const res = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: { host: 'bookmark.example.com', 'x-forwarded-proto': 'http' },
+        payload: credentials,
+      });
+      expect(res.statusCode).toBe(200);
+      expect(rawCookie(res)).not.toContain('Secure');
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('X-Forwarded-Proto 逗号分隔时取第一个值', async () => {
+    const app = await buildTestApp();
+    try {
+      const res = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: { 'x-forwarded-proto': 'https, http' },
+        payload: credentials,
+      });
+      expect(res.statusCode).toBe(200);
+      expect(rawCookie(res)).toContain('Secure');
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('https 域名下登录的同源校验通过', async () => {
+    const app = await buildTestApp({ baseUrl: 'https://bookmark.example.com' });
+    try {
+      const res = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: {
+          host: 'bookmark.example.com',
+          origin: 'https://bookmark.example.com',
+          'x-forwarded-proto': 'https',
+        },
+        payload: credentials,
+      });
+      expect(res.statusCode).toBe(200);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('登出清除 Cookie 时使用与下发时一致的 Secure 属性', async () => {
+    const app = await buildTestApp();
+    try {
+      const loginRes = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: { 'x-forwarded-proto': 'https' },
+        payload: credentials,
+      });
+      const cookies: Record<string, string> = {};
+      for (const c of loginRes.cookies) cookies[c.name] = c.value;
+      const out = await app.app.inject({
+        method: 'POST',
+        url: '/api/auth/logout',
+        headers: { 'x-forwarded-proto': 'https' },
+        cookies,
+      });
+      expect(out.statusCode).toBe(200);
+      expect(rawCookie(out)).toContain('Secure');
+    } finally {
+      await app.close();
+    }
+  });
+});

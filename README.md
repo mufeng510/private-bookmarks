@@ -99,8 +99,10 @@ curl http://NAS-IP:8080/api/health
 > 容器启动时入口脚本会自动把 `./data` 卷属主修正为容器内 node 用户（uid 1000），
 > 随后应用进程以非 root 运行；无需手动 chown。
 >
-> 公网访问请务必在反向代理（Nginx / Caddy / 群晖套件等）上启用 HTTPS，
-> 并把 `BASE_URL` 设为 https 地址，这样 Cookie 会自动带上 `Secure` 标记。
+> 公网访问请在反向代理（Nginx / Caddy / 群晖套件等）上启用 HTTPS，并转发协议头
+> （Nginx: `proxy_set_header X-Forwarded-Proto $scheme;`）。Cookie 的 `Secure` 标记会按
+> **实际请求协议**自动判定：经 https 域名访问自动加上，局域网 http IP 直连则不添加。
+> 因此同一个部署可以同时用公网域名和局域网 IP 登录，无需为局域网修改 `BASE_URL`。
 
 ## Chrome 扩展安装与配置
 
